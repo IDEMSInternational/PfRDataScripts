@@ -100,3 +100,4 @@ ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
   facet_wrap(vars(session))
 
 
+
