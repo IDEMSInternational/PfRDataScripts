@@ -19,6 +19,7 @@ library(readxl)
 library(postgresr)
 library(ggthemes)
 library(shinyauthr)
+library(zoo)
 
 # source any R files which you use in the app:
 source("Personal Setup.R")              # file containing personal set up info
@@ -34,3 +35,4 @@ PLH_shiny(title = "PfR Dashboard",
           data_frame = plhdata_org,   # put name of data frame
           status = "primary",
           key_var = "id")             # irrelevant for you, but, set to be any variable in there. 
+
