@@ -14,7 +14,7 @@ plhdata_org <- postgresr::get_user_data(site = plh_con, filter = FALSE)
                               #filter_variable_value = "pfr",
                               #site = plh_con, merge_check = FALSE, filter = TRUE)
 #names(plhdata_org) <- gsub(x = names(plhdata_org), pattern = "\\-", replacement = ".")  
-View(plhdata_org)
+#View(plhdata_org)
 
 
 #app last launch
@@ -78,7 +78,7 @@ for (i in session_ids){    # A for loop iterates over each element (session ID) 
 session_completion <- dplyr::bind_rows(session_completion) # The bind_rows function takes the list session_completion and combines all the individual data frames (or columns/vectors) within this list into one single data frame.
 session_completion$uuid <- plhdata_org$app_user_id # Each row in the session_completion data frame has a corresponding uuid value, which is taken from the app_user_id column in the plhdata_org data frame. 
 # view session completion with respective uuids
-View(session_completion)
+#View(session_completion)
 
 # e.g. for onboarding:
 session_completion %>% group_by(onboarding) %>% summarise(number_completed = n())

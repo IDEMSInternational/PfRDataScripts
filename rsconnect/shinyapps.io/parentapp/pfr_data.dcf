@@ -1,0 +1,12 @@
+name: pfr_data
+title: pfr_data
+username: parentapp
+account: parentapp
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12540798
+bundleId: 9033824
+url: https://parentapp.shinyapps.io/pfr_data/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
