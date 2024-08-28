@@ -27,7 +27,7 @@ source("PfR_loading_data.R")
 # file containing functions used in the creation and the R script to import/tidy the function
 
 # Excel file with the specifications in it
-data_l <- import_list("PfR_shiny.xlsx")
+data_l <- import_list("PfR_Shiny.xlsx")
 
 # Run the shiny dashboard
 PLH_shiny(title = "PfR Dashboard",
