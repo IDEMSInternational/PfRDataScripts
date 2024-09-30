@@ -1,5 +1,5 @@
 #devtools::install_github("IDEMSInternational/postgresr")
-#devtools::install_github("IDEMSInternational/plhR")
+#devtools::install_github("IDEMSInternational/ExcelToShiny")
 
 #importing the PfR xlsx
 data_l <- import_list("PfR_Shiny.xlsx")
@@ -8,7 +8,7 @@ data_l <- import_list("PfR_Shiny.xlsx")
 #  download PfR app data from Metabase as an RDS file?
 #   plhdata_org <- postgresr::get_user_data(site = plh_con, filter = FALSE)
 
-plhdata_org <- postgresr::get_user_data(site = plh_con, filter = FALSE) 
+plhdata_org <- openappr::get_user_data(site = plh_con, filter = FALSE) 
 
 #plhdata_org <- get_user_data (filter_variable = "app_deployment_name",
                               #filter_variable_value = "pfr",
