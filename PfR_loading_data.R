@@ -99,5 +99,110 @@ ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
   geom_bar(stat = "identity") +
   facet_wrap(vars(session))
 
+# Frequent sessions per user
+# Summarize the session completion counts per user
+frequent_sessions_per_user <- session_completion_longer %>%
+  group_by(uuid) %>%
+  summarise(`Number of sessions completed` = sum(completed == "true", na.rm = TRUE), .groups = 'drop')
 
+frequent_sessions_per_user %>%
+  group_by(`Number of sessions completed`) %>%
+  summarise(`Number of Users` = n())
 
+# Counting the number of users who are on Week X
+# 
+session_ids <- c("onboarding", "family_relation", "current_pract", "child_dev", "parent_childhood",
+"positive_parenting", "gender_power", "impact_conflict", "sharing_care", "healthy_relation",
+"discipline", "education", "gender_equal", "prevent_abuse", "reduce_conflict", "conclusion")
+session_ids <- paste0("rp-contact-field.task_", session_ids, "_completed")
+session_completion_data <- plhdata_org %>%
+  dplyr::select(c(app_user_id, all_of(session_ids))) %>%
+  dplyr::mutate(across(session_ids, ~ifelse(is.na(.), 0, ifelse(. == "false", 0, ifelse(. == "true", 1, 9999))))) %>%
+  pivot_longer(cols = !app_user_id) %>%
+  group_by(app_user_id) %>%
+  mutate(count_ones = {
+    # Find the first position of y == 1
+    first_one <- which(value == 1)[1]
+    
+    # Initialize the vector to store counts
+    temp <- rep(0, length(value))
+    
+    # If there's a 1 in the group, start counting from the first 1
+    if (!is.na(first_one)) {
+      count <- 0
+      for (i in first_one:length(value)) {
+        if (value[i] == 1) {
+          count <- count + 1
+          temp[i] <- count
+        } else if (value[i] == 0) {
+          break  # Stop counting when the first 0 appears after the 1
+        }
+      }
+    }
+    
+    # Return the updated temp vector as the new column
+    temp
+  }) %>%
+  ungroup()
+
+session_completion_data_week <- session_completion_data %>%
+  group_by(app_user_id) %>%
+  summarise(total_consecutive_sessions = max(count_ones)) %>%
+  mutate(week = current_week) %>%
+  mutate(engagement = ifelse(total_consecutive_sessions < week - 1, "Low",
+                             ifelse(total_consecutive_sessions < week, "Medium",
+                                    ifelse(total_consecutive_sessions == week, "High",
+                                           ifelse(total_consecutive_sessions > week, "Above",
+                                                  "Check")))))
+
+view(session_completion_data_week)
+
+#%>%  # Summarize counts
+#  filter(completion_count > 5) %>% #Define "frequently" as visited more than once
+#  summarise(n()) # how many rows are there ? (how many people have cmpleted >5 sessions)
+
+# Check if frequent_sessions_per_user has any data and view the results
+if (nrow(frequent_sessions_per_user) == 0) {
+  warning("No frequent sessions found for any user.")
+} else {
+  View(frequent_sessions_per_user)  # View the result if data is available
+}
+
+# test Number of participants who have completed a homepractice
+# Remove all columns which are entirely NA
+plhdata_org <- plhdata_org[, colSums(is.na(plhdata_org)) < nrow(plhdata_org)]
+
+homepractice_completion_data <- plhdata_org %>%
+  dplyr::select(c(app_user_id, ends_with("hp_completed"))) %>%
+  pivot_longer(cols = !app_user_id) %>%
+  group_by(name) %>%
+  summarise(`Number completed` = sum(value == "true", na.rm = TRUE)) %>%
+  mutate(name = sub("^[^_]*_", "", name)) %>%
+  mutate(name = sub("_hp_completed", "", name)) %>%
+  mutate(name = tools::toTitleCase(gsub("_", " ", name))) 
+  
+
+homepractice_completion_data <- plhdata_org %>%
+  dplyr::select(c(app_user_id, ends_with("hp_completed"))) %>%
+  pivot_longer(cols = !app_user_id) %>%
+  group_by(name) %>%
+  summarise(`Number completed` = sum(value == "true", na.rm = TRUE)) %>%
+  mutate(name = sub("^[^_]*_", "", name)) %>%
+  mutate(name = sub("_hp_completed", "", name)) %>%
+  mutate(name = tools::toTitleCase(gsub("_", " ", name))) 
+# Plot the bar chart
+# ggplot(homepractice_completion_data) +
+#   geom_bar(aes(x = name, y = `Number completed`, fill = name), stat = "identity") +
+#   labs(
+#     title = "Number of Completed Items",
+#     x = "Name",
+#     y = "Number Completed"
+#   ) +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#   guides(fill = "none")
+
+plhdata_org_download <- plhdata_org
+plhdata_org_download$contact_fields <- NULL
+# to add into download tab: frequent_sessions_per_user, plhdata_org_download, session_completion_data_week, 
+#session_completion_longer

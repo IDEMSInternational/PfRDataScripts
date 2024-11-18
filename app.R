@@ -20,6 +20,7 @@ library(openappr)
 library(ggthemes)
 library(shinyauthr)
 library(zoo)
+library(stringdist)
 
 # source any R files which you use in the app:
 source("Personal Setup.R")              # file containing personal set up info
@@ -30,8 +31,9 @@ source("Credentials_data.R")
 # Excel file with the specifications in it
 data_l <- import_list("PfR_Shiny.xlsx")
 
+
 # Run the shiny dashboard
-PLH_shiny(title = "PfR Dashboard",
+build_shiny(title = "PfR Dashboard",
           data_list = data_l,
           data_frame = plhdata_org,   # put name of data frame
           status = "primary",
