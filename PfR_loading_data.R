@@ -155,7 +155,7 @@ session_completion_data_week <- session_completion_data %>%
                                            ifelse(total_consecutive_sessions > week, "Above",
                                                   "Check")))))
 
-view(session_completion_data_week)
+#view(session_completion_data_week)
 
 #%>%  # Summarize counts
 #  filter(completion_count > 5) %>% #Define "frequently" as visited more than once
@@ -165,7 +165,7 @@ view(session_completion_data_week)
 if (nrow(frequent_sessions_per_user) == 0) {
   warning("No frequent sessions found for any user.")
 } else {
-  View(frequent_sessions_per_user)  # View the result if data is available
+  #View(frequent_sessions_per_user)  # View the result if data is available
 }
 
 # test Number of participants who have completed a homepractice
@@ -206,3 +206,30 @@ plhdata_org_download <- plhdata_org
 plhdata_org_download$contact_fields <- NULL
 # to add into download tab: frequent_sessions_per_user, plhdata_org_download, session_completion_data_week, 
 #session_completion_longer
+
+# Completion of homepractice as yes/no/na values table
+hp_done_data <- plhdata_org %>%
+  dplyr::select(c(app_user_id, contains("hp_done_"))) %>%
+  pivot_longer(cols = !app_user_id) %>%
+  group_by(name) %>%
+  summarise(`Number completed` = sum(value == "yes", na.rm = TRUE)) %>%
+  mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+
+hp_done_data_1 <- plhdata_org %>%
+  dplyr::select(c(app_user_id, contains("hp_done_"))) %>%
+  pivot_longer(cols = -app_user_id, names_to = "name", values_to = "value") %>%
+  group_by(name, value) %>%
+  summarise(`Count` = n(), .groups = "drop") %>%
+  pivot_wider(names_from = value, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
+  rename(`Yes Count` = yes, `No Count` = no) %>%
+  mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+
+# Responses to quizes in sessions
+quiz_done_data <- plhdata_org %>%
+  dplyr::select(c(app_user_id, contains("quiz_question"))) %>%
+  pivot_longer(cols = -app_user_id, names_to = "name", values_to = "response") %>%
+  group_by(name, response) %>%
+  summarise(`Count` = n(), .groups = "drop") %>%
+  pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
+  mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+
