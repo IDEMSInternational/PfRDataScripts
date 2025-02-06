@@ -16,6 +16,8 @@ plhdata_org <- openappr::get_user_data(site = plh_con, filter = FALSE)
 #names(plhdata_org) <- gsub(x = names(plhdata_org), pattern = "\\-", replacement = ".")  
 #View(plhdata_org)
 
+# Remove all columns which are entirely NA
+plhdata_org <- plhdata_org[, colSums(is.na(plhdata_org)) < nrow(plhdata_org)]
 
 #app last launch
 plhdata_org$`app_last_launch` <- plhdata_org$`rp-contact-field.app_last_launch`
@@ -168,10 +170,8 @@ if (nrow(frequent_sessions_per_user) == 0) {
   #View(frequent_sessions_per_user)  # View the result if data is available
 }
 
-# test Number of participants who have completed a homepractice
-# Remove all columns which are entirely NA
-plhdata_org <- plhdata_org[, colSums(is.na(plhdata_org)) < nrow(plhdata_org)]
 
+# test Number of participants who have completed a homepractice
 homepractice_completion_data <- plhdata_org %>%
   dplyr::select(c(app_user_id, ends_with("hp_completed"))) %>%
   pivot_longer(cols = !app_user_id) %>%
@@ -230,6 +230,18 @@ quiz_done_data <- plhdata_org %>%
   pivot_longer(cols = -app_user_id, names_to = "name", values_to = "response") %>%
   group_by(name, response) %>%
   summarise(`Count` = n(), .groups = "drop") %>%
-  pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
-  mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+  mutate(name = stringr::str_remove(name, "rp-contact-field.quiz_question_"))
+  #pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
+  #mutate(name = tools::toTitleCase(gsub("_", " ", name)))
 
+library(readxl)
+Quiz_responses <- read_excel("C:/Users/Cabrine/Downloads/PfR in app data collected via App.xlsx", 
+                                                       sheet = "quiz_questions_codebook")
+ 
+Quiz_responses <- pivot_longer(Quiz_responses , cols = starts_with('option_'), names_to = "response")
+ 
+Quiz_responses <- Quiz_responses %>% dplyr::select(c(name = id, `topic/session`, question_text, response, value)) %>%
+  mutate(response = str_remove(response, "_text"))
+
+quiz_done_data <- left_join(quiz_done_data, Quiz_responses) %>%
+  dplyr::select(c(name, response, `topic/session`, question_text, value, Count))
