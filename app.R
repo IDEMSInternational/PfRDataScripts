@@ -1,3 +1,5 @@
+devtools::install_github("IDEMSInternational/ExcelToShiny")
+devtools::install_github("IDEMSInternational/openappr")
 library(rio)
 library(ExcelToShiny)
 library(shiny)
@@ -27,7 +29,6 @@ source("Personal Setup.R")              # file containing personal set up info
 source("PfR_loading_data.R")
 source("Credentials_data.R")
 # file containing functions used in the creation and the R script to import/tidy the function
-
 # Excel file with the specifications in it
 data_l <- import_list("PfR_Shiny.xlsx")
 
