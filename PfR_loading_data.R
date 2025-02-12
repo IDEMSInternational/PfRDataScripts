@@ -234,14 +234,17 @@ quiz_done_data <- plhdata_org %>%
   #pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
   #mutate(name = tools::toTitleCase(gsub("_", " ", name)))
 
+
 library(readxl)
-Quiz_responses <- read_excel("C:/Users/Cabrine/Downloads/PfR in app data collected via App.xlsx", 
-                                                       sheet = "quiz_questions_codebook")
- 
+
+Quiz_responses <- read_excel("PfR_in_app_data_collected_via_App.xlsx", 
+                             sheet = "quiz_questions_codebook")
+
 Quiz_responses <- pivot_longer(Quiz_responses , cols = starts_with('option_'), names_to = "response")
- 
-Quiz_responses <- Quiz_responses %>% dplyr::select(c(name = id, `topic/session`, question_text, response, value)) %>%
+
+Quiz_responses <- Quiz_responses %>% dplyr::select(c(name = id, topic_session, question_text, response, value)) %>%
   mutate(response = str_remove(response, "_text"))
 
 quiz_done_data <- left_join(quiz_done_data, Quiz_responses) %>%
-  dplyr::select(c(name, response, `topic/session`, question_text, value, Count))
+  dplyr::select(c(name, response, topic_session, question_text, value, Count))
+
