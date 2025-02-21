@@ -101,6 +101,44 @@ ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
   geom_bar(stat = "identity") +
   facet_wrap(vars(session))
 
+# session completion frequency table summary
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Create a mapping of session IDs to full names
+session_names <- data.frame(
+  session = c("onboarding", "family_relation", "current_pract", "child_dev", 
+              "parent_childhood", "positive_parenting", "gender_power",
+              "impact_conflict", "sharing_care", "healthy_relation", "review",
+              "discipline", "education", "gender_equal", "prevent_abuse",
+              "reduce_conflict", "conclusion"),
+  full_name = c("Onboarding", "Family Relationships", 
+                "Current Beliefs and Practices", "Child Development Needs and Behaviours", 
+                "Parent’s Childhood Experiences", "Positive Parenting Strategies", 
+                "Gender and Power Dynamics", "Impact of Conflict on Families", 
+                "Sharing Childcare Responsibilities", "Healthy Partner Relationships", 
+                "Review and Reflection", "Discipline and Guidance", 
+                "Education and Learning", "Gender Equality", 
+                "Preventing Abuse and Neglect", "Reducing Conflict at Home", 
+                "Conclusion and Next Steps")
+)
+
+# Summarize session completion counts
+session_completion_summary <- session_completion_longer %>%
+  group_by(session, completed) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  pivot_wider(names_from = completed, values_from = count, values_fill = 0) %>%
+  left_join(session_names, by = "session") %>%  # Merge full names
+  select(full_name, everything())  # Reorder columns
+
+# Rename columns for clarity
+colnames(session_completion_summary) <- c("Full Session Name", "Session ID", "False", "True", "NA")
+
+# Print the final summary table
+print(session_completion_summary)
+
+
 # Frequent sessions per user
 # Summarize the session completion counts per user
 frequent_sessions_per_user <- session_completion_longer %>%
