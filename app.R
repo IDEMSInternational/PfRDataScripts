@@ -1,5 +1,5 @@
 devtools::install_github("IDEMSInternational/ExcelToShiny")
-devtools::install_github("IDEMSInternational/openappr")
+#devtools::install_github("IDEMSInternational/openappr")
 library(rio)
 library(ExcelToShiny)
 library(shiny)
