@@ -9,15 +9,20 @@ data_l <- import_list("PfR_Shiny.xlsx")
 #   plhdata_org <- postgresr::get_user_data(site = plh_con, filter = FALSE)
 
 plhdata_org <- openappr::get_user_data(site = plh_con, filter = FALSE) 
+plhdata_org$device_info <- NULL
 
 #plhdata_org <- get_user_data (filter_variable = "app_deployment_name",
-                              #filter_variable_value = "pfr",
-                              #site = plh_con, merge_check = FALSE, filter = TRUE)
+#filter_variable_value = "pfr",
+#site = plh_con, merge_check = FALSE, filter = TRUE)
 #names(plhdata_org) <- gsub(x = names(plhdata_org), pattern = "\\-", replacement = ".")  
 #View(plhdata_org)
 
 # Remove all columns which are entirely NA
 plhdata_org <- plhdata_org[, colSums(is.na(plhdata_org)) < nrow(plhdata_org)]
+
+#cap date filter
+mydate <- "2023-01-01"
+plhdata_org <- plhdata_org %>% filter(as.Date(createdAt) > as.Date(mydate))
 
 #app last launch
 plhdata_org$`app_last_launch` <- plhdata_org$`rp-contact-field.app_last_launch`
@@ -152,8 +157,8 @@ frequent_sessions_per_user %>%
 # Counting the number of users who are on Week X
 # 
 session_ids <- c("onboarding", "family_relation", "current_pract", "child_dev", "parent_childhood",
-"positive_parenting", "gender_power", "impact_conflict", "sharing_care", "healthy_relation",
-"discipline", "education", "gender_equal", "prevent_abuse", "reduce_conflict", "conclusion")
+                 "positive_parenting", "gender_power", "impact_conflict", "sharing_care", "healthy_relation",
+                 "discipline", "education", "gender_equal", "prevent_abuse", "reduce_conflict", "conclusion")
 session_ids <- paste0("rp-contact-field.task_", session_ids, "_completed")
 session_completion_data <- plhdata_org %>%
   dplyr::select(c(app_user_id, all_of(session_ids))) %>%
@@ -218,7 +223,7 @@ homepractice_completion_data <- plhdata_org %>%
   mutate(name = sub("^[^_]*_", "", name)) %>%
   mutate(name = sub("_hp_completed", "", name)) %>%
   mutate(name = tools::toTitleCase(gsub("_", " ", name))) 
-  
+
 
 homepractice_completion_data <- plhdata_org %>%
   dplyr::select(c(app_user_id, ends_with("hp_completed"))) %>%
@@ -253,6 +258,28 @@ hp_done_data <- plhdata_org %>%
   summarise(`Number completed` = sum(value == "yes", na.rm = TRUE)) %>%
   mutate(name = tools::toTitleCase(gsub("_", " ", name)))
 
+#hp_done_data_1 <- plhdata_org %>%
+  #dplyr::select(c(app_user_id, contains("hp_done_"))) %>%
+  #pivot_longer(cols = -app_user_id, names_to = "name", values_to = "value") %>%
+  #group_by(name, value) %>%
+  #summarise(`Count` = n(), .groups = "drop") %>%
+  #pivot_wider(names_from = value, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
+  #rename(`Yes Count` = yes, `No Count` = no) %>%
+  #hp_done_data_1 <- hp_done_data_1 %>%
+  #mutate(name = forcats::fct_recode,
+         #`1. Family relationships` = "rp-contact-field.hp_done_family_relation",
+         #`2. Current beliefs and practices` = "rp-contact-field.hp_done_current_pract", 
+         #`3. Child development needs and behaviours` = "rp-contact-field.hp_done_child_dev",
+         #`4. Influence of one’s own parents` = "rp-contact-field.hp_done_parent_childhood",
+         #`6. How do we discipline our children` = "rp-contact-field.hp_done_discipline_children",
+         #`8. Impact of parental conflict` = "rp-contact-field.hp_done_impact_conflict",
+         #`9. Sharing child care responsibility` = "rp-contact-field.hp_done_sharing_care",
+         #`10. Healthy marital relationships` = "rp-contact-field.hp_done_healthy_relation",
+         #`12. Encouraging education` = "rp-contact-field.hp_done_education",
+         #`13. Greater gender equality` = "rp-contact-field.hp_done_gender_equal",
+         #`14. Prevention of sexual abuse` = "rp-contact-field.hp_done_prevent_abuse",
+         #`15. Reducing parental conflict` = "rp-contact-field.hp_done_reduce_conflict")
+
 hp_done_data_1 <- plhdata_org %>%
   dplyr::select(c(app_user_id, contains("hp_done_"))) %>%
   pivot_longer(cols = -app_user_id, names_to = "name", values_to = "value") %>%
@@ -260,8 +287,23 @@ hp_done_data_1 <- plhdata_org %>%
   summarise(`Count` = n(), .groups = "drop") %>%
   pivot_wider(names_from = value, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
   rename(`Yes Count` = yes, `No Count` = no) %>%
-  mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+  mutate(name = as.factor(name)) %>%  # Convert to factor before using fct_recode
+  mutate(name = forcats::fct_recode(name,
+                                    `1. Family relationships hp_done_` = "rp-contact-field.hp_done_family_relation",
+                                    `2. Current beliefs and practices hp_done_` = "rp-contact-field.hp_done_current_pract", 
+                                    `3. Child development needs and behaviours hp_done_` = "rp-contact-field.hp_done_child_dev",
+                                    `4. Influence of one’s own parents hp_done_` = "rp-contact-field.hp_done_parent_childhood",
+                                    `6. How do we discipline our children hp_done_` = "rp-contact-field.hp_done_discipline_children",
+                                    `8. Impact of parental conflict hp_done_` = "rp-contact-field.hp_done_impact_conflict",
+                                    `9. Sharing child care responsibilityhp_done_` = "rp-contact-field.hp_done_sharing_care",
+                                    `10. Healthy marital relationships hp_done_` = "rp-contact-field.hp_done_healthy_relation",
+                                    `12. Encouraging education hp_done_` = "rp-contact-field.hp_done_education",
+                                    `13. Greater gender equality hp_done_` = "rp-contact-field.hp_done_gender_equal",
+                                    `14. Prevention of sexual abuse hp_done_` = "rp-contact-field.hp_done_prevent_abuse",
+                                    `15. Reducing parental conflict hp_done_` = "rp-contact-field.hp_done_reduce_conflict"
+  ))
 
+    
 # Responses to quizes in sessions
 quiz_done_data <- plhdata_org %>%
   dplyr::select(c(app_user_id, contains("quiz_question"))) %>%
@@ -269,8 +311,8 @@ quiz_done_data <- plhdata_org %>%
   group_by(name, response) %>%
   summarise(`Count` = n(), .groups = "drop") %>%
   mutate(name = stringr::str_remove(name, "rp-contact-field.quiz_question_"))
-  #pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
-  #mutate(name = tools::toTitleCase(gsub("_", " ", name)))
+#pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
+#mutate(name = tools::toTitleCase(gsub("_", " ", name)))
 
 
 library(readxl)
