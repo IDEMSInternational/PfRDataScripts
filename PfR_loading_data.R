@@ -24,6 +24,9 @@ plhdata_org <- plhdata_org[, colSums(is.na(plhdata_org)) < nrow(plhdata_org)]
 mydate <- "2023-01-01"
 plhdata_org <- plhdata_org %>% filter(as.Date(createdAt) > as.Date(mydate))
 
+# Filter out web users
+plhdata_org <- plhdata_org %>% dplyr::filter(nchar(app_user_id) == 16)
+
 #app last launch
 plhdata_org$`app_last_launch` <- plhdata_org$`rp-contact-field.app_last_launch`
 plhdata_org $ app_last_launch_month <- as.yearmon(plhdata_org$app_last_launch)
