@@ -1,5 +1,5 @@
 devtools::install_github("IDEMSInternational/ExcelToShiny")
-#devtools::install_github("IDEMSInternational/openappr")
+devtools::install_github("IDEMSInternational/openappr")
 library(rio)
 library(ExcelToShiny)
 library(shiny)
@@ -23,6 +23,8 @@ library(ggthemes)
 library(shinyauthr)
 library(zoo)
 library(stringdist)
+
+
 
 # source any R files which you use in the app:
 source("Personal Setup.R")              # file containing personal set up info
