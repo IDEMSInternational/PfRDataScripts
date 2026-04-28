@@ -91,29 +91,25 @@ session_completion$uuid <- plhdata_org$app_user_id # Each row in the session_com
 #View(session_completion)
 
 # e.g. for onboarding:
-session_completion %>% group_by(onboarding) %>% summarise(number_completed = n())
+#session_completion %>% group_by(onboarding) %>% summarise(number_completed = n())
 
 
 # or, you can rearrange and view them all at once:
 session_completion_longer <- session_completion %>% pivot_longer(cols = !uuid, names_to = "session", values_to = "completed")
 
 session_completion_longer_summary <- session_completion_longer %>% group_by(session, completed) %>% summarise(n())
-session_completion_longer_summary
+#session_completion_longer_summary
 
 # across all
-ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
-  geom_bar(stat = "identity")
-
-# or by each one
-ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(vars(session))
+# ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
+#   geom_bar(stat = "identity")
+# 
+# # or by each one
+# ggplot(session_completion_longer_summary, aes(x = completed, y = `n()`)) +
+#   geom_bar(stat = "identity") +
+#   facet_wrap(vars(session))
 
 # session completion frequency table summary
-library(dplyr)
-library(tidyr)
-library(knitr)
-
 # Create a mapping of session IDs to full names
 session_names <- data.frame(
   session = c("onboarding", 
@@ -164,7 +160,7 @@ session_completion_summary <- session_completion_longer %>%
 colnames(session_completion_summary) <- c("Full Session Name", "Session ID", "False", "True", "NA")
 
 # Print the final summary table
-print(session_completion_summary)
+#print(session_completion_summary)
 
 
 # Frequent sessions per user
@@ -216,12 +212,14 @@ session_completion_data <- plhdata_org %>%
 session_completion_data_week <- session_completion_data %>%
   group_by(app_user_id) %>%
   summarise(total_consecutive_sessions = max(count_ones)) %>%
-  mutate(week = current_week) %>%
-  mutate(engagement = ifelse(total_consecutive_sessions < week - 1, "Low",
-                             ifelse(total_consecutive_sessions < week, "Medium",
-                                    ifelse(total_consecutive_sessions == week, "High",
-                                           ifelse(total_consecutive_sessions > week, "Above",
-                                                  "Check")))))
+# temp. disable since cannot find current_week
+  # mutate(week = current_week) %>%
+  mutate(engagement = "NA")
+  # mutate(engagement = ifelse(total_consecutive_sessions < week - 1, "Low",
+  #                            ifelse(total_consecutive_sessions < week, "Medium",
+  #                                   ifelse(total_consecutive_sessions == week, "High",
+  #                                          ifelse(total_consecutive_sessions > week, "Above",
+  #                                                 "Check")))))
 
 #view(session_completion_data_week)
 
@@ -337,8 +335,6 @@ quiz_done_data <- plhdata_org %>%
 #pivot_wider(names_from = response, values_from = `Count`, values_fill = list(`Count` = 0)) %>%
 #mutate(name = tools::toTitleCase(gsub("_", " ", name)))
 
-
-library(readxl)
 
 Quiz_responses <- read_excel("PfR_in_app_data_collected_via_App.xlsx", 
                              sheet = "quiz_questions_codebook")
